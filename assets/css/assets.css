@@ -1,0 +1,49 @@
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px;
+  background: rgb(4, 55, 71);
+}
+
+img[src*="#my-bioscan"] {
+    width: 420px;
+    height: 180px;
+    display: flex;
+    margin: 25px auto;       
+}
+img[src*="#my-eleodora"] {
+    width: 400px;
+    height: 110px;
+    object-fit: contain;
+    margin: 50px auto;
+    display: flex;
+}
+img[src*="#my-empoli"] {
+    width: 350px;
+    height: 100px;
+    display: block;
+    margin: 65px auto;       
+    position: relative;
+}
+img[src*="#my-urban"] {
+    width: 210px;
+    height: 210px;
+    display: block;
+    margin: 0 auto;       
+    position: relative;
+}
+img[src*="#my-local"] {
+    width: 450px;
+    height: 200px;
+    display: block;
+    margin: 0 auto;       
+    position: relative;
+}
+img[src*="#my-lumina"] {
+    width: 450px;
+    height: 120px;
+    display: block;
+    margin: 0 auto;       
+    position: relative;
+}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>LUMINA LAB BI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo {
+            width: 500px;       
+            height: auto;       
+            border-radius: 8px; 
+            object-fit: contain;
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .info-text {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: left;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        #qsLoginBtn {
+            background-color: #4CAF50;
+            color: white;
+            border: 2px solid #4CAF50;
+        }
+        
+        #qsLoginBtn:hover {
+            background-color: transparent;
+            color: #4CAF50;
+        }
+        
+        #qsLogoutBtn {
+            background-color: #f44336;
+            color: white;
+            border: 2px solid #f44336;
+        }
+        
+        #qsLogoutBtn:hover {
+            background-color: transparent;
+            color: #f44336;
+        }
+        
+        .user-info {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Adicione sua imagem aqui (substitua pelo caminho correto) -->
+        <img src="{{ url_for('static', filename='assets/lumina.jpg') }}" alt="Logo" class="logo">
+        
+        {% if session %}
+        <div class="user-info">
+            <h1>Welcome {{session.userinfo.name}}!</h1>
+            <p><a href="/logout" class="btn" id="qsLogoutBtn">Logout</a></p>
+            <div><pre>{{pretty}}</pre></div>
+        </div>
+        {% else %}
+        <!-- h1>LUMINA GerencIA</h1 -- >
+        
+        <!-- Texto informativo fixo -->
+        <div class="info-text">
+            <h3>LUMINA BI</h3>
+            <p>This is the secure login portal for our analytics dashboard. 
+            Please authenticate to access your personalized data visualization 
+            and reporting tools.</p>
+            
+            <h3>Features:</h3>
+            <ul>
+                <li>Real-time data monitoring</li>
+                <li>Interactive visualizations</li>
+                <li>Custom reporting</li>
+                <li>Team collaboration</li>
+            </ul>
+        </div>
+        
+        <p><a href="/login" class="btn" id="qsLoginBtn">Continue to Login</a></p>
+        {% endif %}
+    </div>
+</body>
+</html>
