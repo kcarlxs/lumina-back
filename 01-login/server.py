@@ -1,75 +1,76 @@
-"""Python Flask WebApp Auth0 integration example
-"""
+#prompt to start server-> "unicorv server_fast:app"
+#!pip install fastapi uvicorn python-dotenv authlib starlette
+#!pip install "fastapi[standard]"
 
-import json
-from os import environ as env
-from urllib.parse import quote_plus, urlencode
+import os
+from urllib.parse import urlencode, quote_plus #montam URLs com parâmetros
 
-from authlib.integrations.flask_client import OAuth
-from dotenv import find_dotenv, load_dotenv
-from flask import Flask, redirect, render_template, session, url_for
+from fastapi import FastAPI, Request #requisição HTTP
+from fastapi.responses import HTMLResponse, RedirectResponse #respostas HTTP
+from starlette.middleware.sessions import SessionMiddleware #gerencia sessões de usuário
+from authlib.integrations.starlette_client import OAuth #integração do Authlib com Starlette para autenticação OAuth
+from dotenv import load_dotenv #carrega variáveis de ambiente de um arquivo .env
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-ENV_FILE = find_dotenv()
-if ENV_FILE:
-    load_dotenv(ENV_FILE)
+load_dotenv()
 
-app = Flask(__name__) #
-app.secret_key = env.get("APP_SECRET_KEY")
+app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-oauth = OAuth(app)
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("APP_SECRET_KEY"))
 
+#configuração do OAuth
+oauth = OAuth()
 oauth.register(
-    "auth0",
-    client_id=env.get("AUTH0_CLIENT_ID"),
-    client_secret=env.get("AUTH0_CLIENT_SECRET"),
-    client_kwargs={
-        "scope": "openid profile email",
-    },
-    server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration',
+    name="auth0",
+    client_id=os.getenv("AUTH0_CLIENT_ID"),
+    client_secret=os.getenv("AUTH0_CLIENT_SECRET"),
+    client_kwargs={"scope": "openid profile email"},
+    server_metadata_url=f'https://{os.getenv("AUTH0_DOMAIN")}/.well-known/openid-configuration',
 )
 
-
-# Controllers API
-@app.route("/")
-def home():
-    return render_template(
+# Rota principal que exibe a página inicial
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    user = request.session.get("user")
+    return templates.TemplateResponse(
         "home.html",
-        session=session.get("user"),
-        pretty=json.dumps(session.get("user"), indent=4),
+        {
+            "request": request,
+            "session": user,
+            "pretty": user,
+        }
     )
 
+#página de autenticação do Auth0
+@app.get("/login")
+async def login(request: Request):
+    redirect_uri = request.url_for("callback")
+    return await oauth.auth0.authorize_redirect(request, redirect_uri)
 
-@app.route("/callback", methods=["GET", "POST"])
-def callback():
-    token = oauth.auth0.authorize_access_token()
-    session["user"] = token
-    return redirect("http://127.0.0.1:8050/")
+# callback pra resposta do Auth0 apos o login
+@app.get("/callback")
+async def callback(request: Request):
+    token = await oauth.auth0.authorize_access_token(request)
+    request.session["user"] = token
+    return RedirectResponse(url="http://127.0.0.1:8050/")
 
-
-@app.route("/login")
-def login():
-    return oauth.auth0.authorize_redirect(
-        redirect_uri=url_for("callback", _external=True)
-    )
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(
-        "https://"
-        + env.get("AUTH0_DOMAIN")
+# logout que redireciona para o Auth0
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(
+        url="https://"
+        + os.getenv("AUTH0_DOMAIN")
         + "/v2/logout?"
         + urlencode(
             {
-                "returnTo": url_for("home", _external=True),
-                "client_id": env.get("AUTH0_CLIENT_ID"),
+                "returnTo": str(request.url_for("home")),
+                "client_id": os.getenv("AUTH0_CLIENT_ID"),
             },
             quote_via=quote_plus,
         )
     )
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=env.get("PORT", 3000))
