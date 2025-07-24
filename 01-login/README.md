@@ -1,4 +1,4 @@
-# Auth0 Python Web App Sample
+# Auth0 Python Web App Sample - FLASK
 
 This sample demonstrates how to add authentication to a Python web app using Auth0.
 
